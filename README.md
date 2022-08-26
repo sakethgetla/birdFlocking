@@ -3,7 +3,8 @@
 
 sumulating birdflocking.
 
-TODO 
+# TODO 
+
 [x] display boids.
 [x] boids move according to their velocities.
 [x] boids move according to their velocities.
