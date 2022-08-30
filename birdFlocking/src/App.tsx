@@ -10,7 +10,7 @@ const App: Component = () => {
   let frame: number;
   let lastTime: number = 0;
   const FPS = 30;
-  const numBodies = 10;
+  const numBodies = 15;
   const timeStep = 1000 / FPS;
   let x = 0;
   let frameSize: [number, number] = [500, 500];
@@ -32,7 +32,7 @@ const App: Component = () => {
 
 
     let pos = tf.randomUniform([numBodies, 2], frameSize[0] * 0.3, frameSize[0] * 0.7);
-    let vel = tf.randomUniform([numBodies, 2], -1, 1);
+    let vel = tf.randomUniform([numBodies, 2], -0.1, 0.2);
     // let vel = tf.rand([numBodies, 2]);
     bodies = { pos, vel, size: 5 };
     // pos.print();
@@ -58,7 +58,8 @@ const App: Component = () => {
     avgPos = tf.mul(avgPos, 1 / (numBodies - 1))
     avgPos = tf.sub(avgPos, bodies.pos);
     // let forces = tf.mul(avgPos, 0.001);
-    forces = tf.mul(avgPos, 0.001);
+    // forces = tf.mul(avgPos, 0.001);
+    forces = tf.divNoNan(avgPos, 500);
     // forces.print();
     bodies.vel = tf.add(bodies.vel, forces);
 
@@ -67,7 +68,8 @@ const App: Component = () => {
 
     let avgVel = tf.sum(bodies.vel, 0);
     avgVel = tf.sub(avgVel, bodies.vel);
-    avgVel = tf.mul(avgVel, 0.001/(numBodies-1));
+    avgVel = tf.divNoNan(avgVel, (numBodies-1)*100);
+    // avgVel = tf.mul(avgVel, 0.001/(numBodies-1));
     bodies.vel = tf.add(bodies.vel, avgVel);
 
 
@@ -85,7 +87,7 @@ const App: Component = () => {
     y = tf.pow(x, 2);
     y = tf.sum(y, 2);
     // y = tf.pow(y, -1.1);
-    y = tf.divNoNan(2, y);
+    y = tf.divNoNan(1, y);
     // y.print();
     // console.log(y.shape);
 
