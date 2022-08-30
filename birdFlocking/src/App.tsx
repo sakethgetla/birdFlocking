@@ -31,10 +31,10 @@ const App: Component = () => {
     // let vel = math.random(math.matrix([numBodies, 2]), -1, 1);
 
 
-    let pos = tf.randomUniform([numBodies, 2], frameSize[0] * 0.1, frameSize[0] * 0.9);
-    let vel = tf.randomUniform([numBodies, 2], -5, 5);
+    let pos = tf.randomUniform([numBodies, 2], frameSize[0] * 0.3, frameSize[0] * 0.7);
+    let vel = tf.randomUniform([numBodies, 2], -1, 1);
     // let vel = tf.rand([numBodies, 2]);
-    bodies = { pos, vel, size: 10 };
+    bodies = { pos, vel, size: 5 };
     // pos.print();
     // vel.print();
 
@@ -45,12 +45,68 @@ const App: Component = () => {
   // function updateForces(bodies: { pos: tf.Tensor, vel: tf.Tensor, size: number }): void {
   function updateForces(): void {
 
+    let forces;
     // *make the boids go to the centre*
-    let centreScreen = tf.tensor([[ frameSize[0]/2, frameSize[1]/2 ]]);
-    let dirVec = tf.sub(centreScreen, bodies.pos);
-    let forces = tf.mul(dirVec, 0.001);
+    // let centreScreen = tf.tensor([[frameSize[0] / 2, frameSize[1] / 2]]);
+    // let dirVec = tf.sub(centreScreen, bodies.pos);
+    // forces = tf.mul(dirVec, 0.001);
+    // bodies.vel = tf.add(bodies.vel, forces);
+
+    // cohesion
+    let avgPos = tf.sum(bodies.pos, 0);
+    avgPos = tf.sub(avgPos, bodies.pos);
+    avgPos = tf.mul(avgPos, 1 / (numBodies - 1))
+    avgPos = tf.sub(avgPos, bodies.pos);
+    // let forces = tf.mul(avgPos, 0.001);
+    forces = tf.mul(avgPos, 0.001);
+    // forces.print();
     bodies.vel = tf.add(bodies.vel, forces);
 
+    // alignment
+    // add all velocities
+
+    let avgVel = tf.sum(bodies.vel, 0);
+    avgVel = tf.sub(avgVel, bodies.vel);
+    avgVel = tf.mul(avgVel, 0.001/(numBodies-1));
+    bodies.vel = tf.add(bodies.vel, avgVel);
+
+
+    // separation
+
+    let x = tf.zeros([numBodies, numBodies, 2]);
+
+    x = tf.add(x, bodies.pos)
+    // x.print();
+    // console.log(x.shape);
+
+    x = tf.sub(tf.transpose(x, [1, 0, 2]), x);
+
+    let y;
+    y = tf.pow(x, 2);
+    y = tf.sum(y, 2);
+    // y = tf.pow(y, -1.1);
+    y = tf.divNoNan(2, y);
+    // y.print();
+    // console.log(y.shape);
+
+    // x =
+    // y = tf.clipByValue(y, 0, 10);
+    // x = tf.clipByValue(x, 0, 10);
+    x = tf.transpose(tf.mul(tf.transpose(x), tf.transpose(y)));
+
+    // x.print();
+    // x = tf.clipByValue(x, 0, 10);
+    // x.print();
+
+    x = tf.sum(x, 1);
+    // x.print();
+
+    bodies.vel = tf.add(bodies.vel, x);
+
+    // x.print();
+    // console.log(x.shape);
+
+    // avoid walls
 
 
   }
@@ -78,6 +134,11 @@ const App: Component = () => {
       }
 
 
+      // tf.norm( bodies.vel, 'euclidean', 1).print()
+      // tf.div(bodies.vel, tf.norm(bodies.vel, 'euclidean', 1)).print();
+
+
+      // bodies.pos = tf.add(bodies.pos, tf.div(bodies.vel, tf.norm(bodies.vel, 'euclidean', 1)));
       bodies.pos = tf.add(bodies.pos, bodies.vel);
     }
 
