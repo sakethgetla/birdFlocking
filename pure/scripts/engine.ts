@@ -1,6 +1,3 @@
-// require('@tensorflow/tfjs-backend-cpu');
-// var tf = require( '@tensorflow/tfjs-core');
-// import * as tf from;
 import '@tensorflow/tfjs-backend-cpu';
 import * as tf from '@tensorflow/tfjs-core';
 
@@ -73,7 +70,7 @@ var Engine = function(global: any) {
     avgPos = tf.sub(avgPos, bodies.pos);
     // let forces = tf.mul(avgPos, 0.001);
     // forces = tf.mul(avgPos, 0.001);
-    forces = tf.divNoNan(avgPos, 500);
+    let forces = tf.divNoNan(avgPos, 500);
     // forces.print();
     bodies.vel = tf.add(bodies.vel, forces);
 
